@@ -14,6 +14,7 @@ import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
 import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
 import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
 import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.slf4j.Logger;
 
@@ -91,7 +92,7 @@ public class JsqPlugin {
         var format = prefix + getRandomItem(messages) + suffix;
         var message = miniMessage.deserialize(replacePlaceholders(format, placeholders));
 
-        this.server.sendMessage(message);
+        this.broadcast(message);
     }
 
     @Subscribe
@@ -113,7 +114,17 @@ public class JsqPlugin {
         var format = prefix + getRandomItem(messages) + suffix;
         var message = miniMessage.deserialize(replacePlaceholders(format, placeholders));
 
-        this.server.sendMessage(message);
+        this.broadcast(message);
+    }
+
+    private void broadcast(Component message) {
+        this.server.getAllPlayers().forEach(player -> {
+            try {
+                player.sendMessage(message);
+            } catch (Exception e) {
+                logger.error("failed to send message to player: {}", e.getMessage());
+            }
+        });
     }
 
     private String replacePlaceholders(String input, Placeholders placeholders) {

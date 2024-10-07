@@ -1,6 +1,6 @@
 configVersion: 1
 
-joinMessagePrefix: "[<green>+</green>] "
+joinMessagePrefix: "<gray>[</gray><green>+</green><gray>]</gray> "
 joinMessageSuffix: " <gray>({next_server})</gray>"
 joinMessages:
 - "{player} <yellow>showed up. The party can finally start!</yellow>"
@@ -13,12 +13,12 @@ joinMessages:
 - "{player} <yellow>is here! Yes! Gosh</yellow> {player} <yellow>is great</yellow>"
 - "{player} <yellow>logged in. How long 'til they fall in lava?</yellow>"
 
-switchMessagePrefix: "[<light_purple>></light_purple>] {player} <yellow>switched from</yellow> <gray>{previous_server}</gray> <yellow>to</yellow> <gray>{next_server}</gray>"
+switchMessagePrefix: "<gray>[</gray><light_purple>></light_purple><gray>]</gray> {player} <yellow>switched from</yellow> <gray>{previous_server}</gray> <yellow>to</yellow> <gray>{next_server}</gray>"
 switchMessageSuffix: ""
 switchMessages:
 - ""
 
-quitMessagePrefix: "[<red>-</red>] "
+quitMessagePrefix: "<gray>[</gray><red>-</red><gray>]</gray> "
 quitMessageSuffix: ""
 quitMessages:
 - "{player} <yellow>has left. The game just got 10% easier</yellow>"
