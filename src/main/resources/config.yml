@@ -1,0 +1,32 @@
+configVersion: 1
+
+joinMessagePrefix: "[<green>+</green>] "
+joinMessageSuffix: " <gray>({next_server})</gray>"
+joinMessages:
+- "{player} <yellow>showed up. The party can finally start!</yellow>"
+- "{player} <yellow>arrived. We're back in business!</yellow>"
+- "{player} <yellow>connected. Better late than never</yellow>"
+- "{player} <yellow>is here. Great.</yellow>"
+- "{player} <yellow>is here. Let's goooo</yellow>"
+- "{player} <yellow>is here. Brace yourselves!</yellow>"
+- "{player} <yellow>just joined. Everybody wave!</yellow>"
+- "{player} <yellow>is here! Yes! Gosh</yellow> {player} <yellow>is great</yellow>"
+- "{player} <yellow>logged in. How long 'til they fall in lava?</yellow>"
+
+switchMessagePrefix: "[<light_purple>></light_purple>] {player} <yellow>switched from</yellow> <gray>{previous_server}</gray> <yellow>to</yellow> <gray>{next_server}</gray>"
+switchMessageSuffix: ""
+switchMessages:
+- ""
+
+quitMessagePrefix: "[<red>-</red>] "
+quitMessageSuffix: ""
+quitMessages:
+- "{player} <yellow>has left. The game just got 10% easier</yellow>"
+- "{player} <yellow>disconnected. Did they rage quit?..</yellow>"
+- "{player} <yellow>rage quit</yellow>"
+- "{player} <yellow>has left. Finally, some peace and quiet</yellow>"
+- "{player} <yellow>bailed. Guess they had better things to do</yellow>"
+- "{player} <yellow>disconnected. We’re doomed without them... or not</yellow>"
+- "{player} <yellow>logged out. Time for the real players to shine</yellow>"
+- "{player} <yellow>bailed. Did someone forget to feed them?</yellow>"
+- "{player} <yellow>is gone. Panic!</yellow>"
