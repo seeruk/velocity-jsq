@@ -25,7 +25,7 @@ import java.util.Objects;
 import java.util.Random;
 
 @Plugin(
-    id = "seers-jsq",
+    id = "velocity-jsq",
     name = "Seer's Velocity Join, Switch, Quit",
     description = "Adds network-wide join/switch/quit messages to your server so players know what's going on",
     version = BuildConstants.VERSION
