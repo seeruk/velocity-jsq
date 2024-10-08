@@ -54,7 +54,7 @@ public final class JsqPlugin extends JavaPlugin {
         getLogger().info("initialised");
 
         // TODO: Config
-        this.redisClient = RedisClient.create("redis://127.0.0.1:6379");
+        this.redisClient = RedisClient.create(this.config.getString("redisUri"));
 
         var conn = redisClient.connectPubSub();
 
