@@ -1,4 +1,6 @@
-configVersion: 1
+configVersion: 2
+
+redisUri: redis://localhost:6379
 
 joinMessagePrefix: "<gray>[</gray><green>+</green><gray>]</gray> "
 joinMessageSuffix: " <gray>({next_server})</gray>"

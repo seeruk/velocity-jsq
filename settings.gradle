@@ -1,1 +1,3 @@
-rootProject.name = 'seers-jsq'
+rootProject.name = "seers-jsq"
+
+include "paper-jsq", "velocity-jsq"

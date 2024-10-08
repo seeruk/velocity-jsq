@@ -14,8 +14,7 @@ import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
 import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
 import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
 import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import io.lettuce.core.RedisClient;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -33,6 +32,10 @@ import java.util.Random;
 )
 public class JsqPlugin {
 
+    public static final String CHANNEL = "seers-jsq:main";
+
+    private RedisClient redisClient;
+
     private YamlDocument config;
 
     @DataDirectory
@@ -44,8 +47,6 @@ public class JsqPlugin {
 
     @Inject
     private ProxyServer server;
-
-    private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) throws IOException {
@@ -65,6 +66,9 @@ public class JsqPlugin {
 
         this.config.update();
         this.config.save();
+
+        this.redisClient = RedisClient.create(this.config.getString("redisUri"));
+        this.redisClient.connect();
 
         logger.info("initialised");
     }
@@ -90,9 +94,8 @@ public class JsqPlugin {
         var messages = this.config.getStringList(messageType + "Messages");
 
         var format = prefix + getRandomItem(messages) + suffix;
-        var message = miniMessage.deserialize(replacePlaceholders(format, placeholders));
 
-        this.broadcast(message);
+        this.redisClient.connect().async().publish(CHANNEL, replacePlaceholders(format, placeholders));
     }
 
     @Subscribe
@@ -112,19 +115,8 @@ public class JsqPlugin {
         var messages = this.config.getStringList("quitMessages");
 
         var format = prefix + getRandomItem(messages) + suffix;
-        var message = miniMessage.deserialize(replacePlaceholders(format, placeholders));
 
-        this.broadcast(message);
-    }
-
-    private void broadcast(Component message) {
-        this.server.getAllPlayers().forEach(player -> {
-            try {
-                player.sendMessage(message);
-            } catch (Exception e) {
-                logger.error("failed to send message to player: {}", e.getMessage());
-            }
-        });
+        this.redisClient.connect().async().publish(CHANNEL, replacePlaceholders(format, placeholders));
     }
 
     private String replacePlaceholders(String input, Placeholders placeholders) {

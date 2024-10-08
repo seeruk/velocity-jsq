@@ -1,0 +1,4 @@
+name: paper-jsq
+version: '1.0-SNAPSHOT'
+main: dev.seeruk.plugin.paper.jsq.JsqPlugin
+api-version: '1.21'
