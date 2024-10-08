@@ -7,7 +7,6 @@ import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
-import com.velocitypowered.api.proxy.ProxyServer;
 import dev.dejvokep.boostedyaml.YamlDocument;
 import dev.dejvokep.boostedyaml.dvs.versioning.BasicVersioning;
 import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
@@ -15,6 +14,7 @@ import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
 import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
 import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
 import io.lettuce.core.RedisClient;
+import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -32,21 +32,20 @@ import java.util.Random;
 )
 public class JsqPlugin {
 
-    public static final String CHANNEL = "seers-jsq:main";
-
-    private RedisClient redisClient;
+    private final Path dataDirectory;
+    private final Logger logger;
 
     private YamlDocument config;
-
-    @DataDirectory
-    @Inject
-    private Path dataDirectory;
+    private RedisPubSubAsyncCommands<String, String> redisConn;
 
     @Inject
-    private Logger logger;
-
-    @Inject
-    private ProxyServer server;
+    public JsqPlugin(
+        @DataDirectory Path dataDirectory,
+        Logger logger
+    ) {
+        this.dataDirectory = dataDirectory;
+        this.logger = logger;
+    }
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) throws IOException {
@@ -67,10 +66,11 @@ public class JsqPlugin {
         this.config.update();
         this.config.save();
 
-        this.redisClient = RedisClient.create(this.config.getString("redisUri"));
-        this.redisClient.connect();
+        this.redisConn = RedisClient.create(this.config.getString("redisUri"))
+            .connectPubSub()
+            .async();
 
-        logger.info("initialised");
+        logger.info("Initialised successfully");
     }
 
     @Subscribe
@@ -89,13 +89,14 @@ public class JsqPlugin {
 
         var messageType = previousServer.map(server -> "switch").orElse("join");
 
+        var channel = this.config.getString("redisChannel");
         var prefix = this.config.getString(messageType + "MessagePrefix");
         var suffix = this.config.getString(messageType + "MessageSuffix");
         var messages = this.config.getStringList(messageType + "Messages");
 
         var format = prefix + getRandomItem(messages) + suffix;
 
-        this.redisClient.connect().async().publish(CHANNEL, replacePlaceholders(format, placeholders));
+        this.redisConn.publish(channel, replacePlaceholders(format, placeholders));
     }
 
     @Subscribe
@@ -110,13 +111,14 @@ public class JsqPlugin {
                 .orElse("unknown")
         );
 
+        var channel = this.config.getString("redisChannel");
         var prefix = this.config.getString("quitMessagePrefix");
         var suffix = this.config.getString("quitMessageSuffix");
         var messages = this.config.getStringList("quitMessages");
 
         var format = prefix + getRandomItem(messages) + suffix;
 
-        this.redisClient.connect().async().publish(CHANNEL, replacePlaceholders(format, placeholders));
+        this.redisConn.publish(channel, replacePlaceholders(format, placeholders));
     }
 
     private String replacePlaceholders(String input, Placeholders placeholders) {
@@ -126,10 +128,7 @@ public class JsqPlugin {
     }
 
     private <T> T getRandomItem(List<T> list) {
-        Random random = new Random();
-        int listSize = list.size();
-        int randomIndex = random.nextInt(listSize);
-        return list.get(randomIndex);
+        return list.get(new Random().nextInt(list.size()));
     }
 
     private record Placeholders(

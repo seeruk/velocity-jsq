@@ -1,6 +1,7 @@
-configVersion: 2
+configVersion: 3
 
 redisUri: redis://localhost:6379
+redisChannel: seers-jsq:main
 
 joinMessagePrefix: "<gray>[</gray><green>+</green><gray>]</gray> "
 joinMessageSuffix: " <gray>({next_server})</gray>"

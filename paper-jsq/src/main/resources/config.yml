@@ -1,3 +1,4 @@
-configVersion: 1
+configVersion: 2
 
 redisUri: redis://localhost:6379
+redisChannel: seers-jsq:main
