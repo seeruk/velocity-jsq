@@ -1,4 +1,7 @@
-configVersion: 2
+configVersion: 3
 
 redisUri: redis://localhost:6379
 redisChannel: seers-jsq:main
+
+playerNamePlaceholder: "%player_name%"
+playerNameFallback: "{player}"

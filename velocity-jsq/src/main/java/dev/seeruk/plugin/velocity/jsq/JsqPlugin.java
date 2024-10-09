@@ -13,7 +13,11 @@ import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
 import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
 import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
 import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
+import dev.seeruk.plugin.common.jsq.JsqEvent;
 import io.lettuce.core.RedisClient;
+import io.lettuce.core.codec.ByteArrayCodec;
+import io.lettuce.core.codec.RedisCodec;
+import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
 import org.slf4j.Logger;
 
@@ -36,7 +40,7 @@ public class JsqPlugin {
     private final Logger logger;
 
     private YamlDocument config;
-    private RedisPubSubAsyncCommands<String, String> redisConn;
+    private RedisPubSubAsyncCommands<String, byte[]> redisConn;
 
     @Inject
     public JsqPlugin(
@@ -67,7 +71,7 @@ public class JsqPlugin {
         this.config.save();
 
         this.redisConn = RedisClient.create(this.config.getString("redisUri"))
-            .connectPubSub()
+            .connectPubSub(RedisCodec.of(StringCodec.UTF8, ByteArrayCodec.INSTANCE))
             .async();
 
         logger.info("Initialised successfully");
@@ -96,7 +100,13 @@ public class JsqPlugin {
 
         var format = prefix + getRandomItem(messages) + suffix;
 
-        this.redisConn.publish(channel, replacePlaceholders(format, placeholders));
+        var protoEvent = JsqEvent.newBuilder()
+            .setMessage(replacePlaceholders(format, placeholders))
+            .setPlayerUuid(player.getUniqueId().toString())
+            .setPlayerName(player.getUsername())
+            .build();
+
+        this.redisConn.publish(channel, protoEvent.toByteArray());
     }
 
     @Subscribe
@@ -118,7 +128,13 @@ public class JsqPlugin {
 
         var format = prefix + getRandomItem(messages) + suffix;
 
-        this.redisConn.publish(channel, replacePlaceholders(format, placeholders));
+        var protoEvent = JsqEvent.newBuilder()
+            .setMessage(replacePlaceholders(format, placeholders))
+            .setPlayerUuid(player.getUniqueId().toString())
+            .setPlayerName(player.getUsername())
+            .build();
+
+        this.redisConn.publish(channel, protoEvent.toByteArray());
     }
 
     private String replacePlaceholders(String input, Placeholders placeholders) {

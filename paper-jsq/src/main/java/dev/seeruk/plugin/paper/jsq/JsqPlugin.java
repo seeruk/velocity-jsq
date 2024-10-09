@@ -7,6 +7,9 @@ import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
 import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
 import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
 import io.lettuce.core.RedisClient;
+import io.lettuce.core.codec.ByteArrayCodec;
+import io.lettuce.core.codec.RedisCodec;
+import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -19,24 +22,35 @@ import java.util.Optional;
 public final class JsqPlugin extends JavaPlugin {
 
     private RedisClient redisClient;
-    private StatefulRedisPubSubConnection<String, String> redisConn;
+    private StatefulRedisPubSubConnection<String, byte[]> redisConn;
 
     @Override
     public void onEnable() {
         var config = this.getOrCreateConfig().orElseThrow();
+        var logger = getLogger();
         var pluginManager = getServer().getPluginManager();
         var serializer = MiniMessage.miniMessage();
         var scheduler = getServer().getScheduler();
 
-        this.redisClient = RedisClient.create(config.getString("redisUri"));
-        this.redisConn = this.redisClient.connectPubSub();
+        // Register placeholders
+        new JsqExpansion(
+            config.getString("playerNamePlaceholder"),
+            config.getString("playerNameFallback")
+        ).register();
 
-        this.redisConn.addListener(new JsqListener(this, serializer, scheduler));
+        // Connect to Redis
+        this.redisClient = RedisClient.create(config.getString("redisUri"));
+        this.redisConn = this.redisClient.connectPubSub(RedisCodec.of(StringCodec.UTF8, ByteArrayCodec.INSTANCE));
+
+        // Listen for Redis messages
+        this.redisConn.addListener(new JsqListener(this, logger, serializer, scheduler));
         this.redisConn.sync().subscribe(config.getString("redisChannel"));
 
+        // Register event listeners
         pluginManager.registerEvents(new PlayerEventListener(), this);
 
-        getLogger().info("Initialised successfully");
+        // Done!
+        logger.info("Initialised successfully");
     }
 
     @Override
