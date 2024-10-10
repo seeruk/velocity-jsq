@@ -12,6 +12,7 @@ import io.lettuce.core.codec.RedisCodec;
 import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -48,6 +49,8 @@ public final class JsqPlugin extends JavaPlugin {
 
         // Register event listeners
         pluginManager.registerEvents(new PlayerEventListener(), this);
+
+        logger.info(Bukkit.getBukkitVersion());
 
         // Done!
         logger.info("Initialised successfully");
